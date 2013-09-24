@@ -37,7 +37,7 @@ class ImageExtractor
 
     find_image_from_meta_tags if @images.empty?
 
-    return @images.slice(0, limit)
+    return @images.uniq.slice(0, limit)
   end
 
   def get_best_image
@@ -120,18 +120,18 @@ class ImageExtractor
     images = filter_by_filesize(images, min_bytes, max_bytes)
 
     download_images_and_get_results(images, parent_depth).tap do |results|
-      if results.empty?
-        if parent_depth < 5
-          # We start at the top node then recursively go up to siblings/parent/grandparent to find something good
-          if prev_sibling = node.previous_sibling
-            check_for_large_images prev_sibling, parent_depth, sibling_depth + 1
-          else
-            check_for_large_images(node.parent, parent_depth + 1, sibling_depth)
-          end
+      #if results.empty?
+      if parent_depth < 5
+        # We start at the top node then recursively go up to siblings/parent/grandparent to find something good
+        if prev_sibling = node.previous_sibling
+          check_for_large_images prev_sibling, parent_depth, sibling_depth + 1
+        else
+          check_for_large_images(node.parent, parent_depth + 1, 0)
         end
-      else
-        @images = results
       end
+      # else
+      @images += results
+      # end
     end
   end
 
