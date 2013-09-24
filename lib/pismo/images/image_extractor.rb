@@ -96,6 +96,8 @@ class ImageExtractor
   #  * 4. any images left over, use fastimage to check their dimensions
   #  * 5. Score images based on different factors like relative height/width
   def check_for_large_images(node, parent_depth, sibling_depth)
+    return if node.nil?
+
     images = []
 
     begin
@@ -126,7 +128,7 @@ class ImageExtractor
         if prev_sibling = node.previous_sibling
           check_for_large_images prev_sibling, parent_depth, sibling_depth + 1
         else
-          check_for_large_images(node.parent, parent_depth + 1, 0)
+          check_for_large_images(node.parent, parent_depth + 1, 0) if node.parent.present?
         end
       end
       # else
