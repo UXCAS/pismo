@@ -126,9 +126,9 @@ class ImageExtractor
       if parent_depth < 5
         # We start at the top node then recursively go up to siblings/parent/grandparent to find something good
         if prev_sibling = node.previous_sibling
-          check_for_large_images prev_sibling, parent_depth, sibling_depth + 1
+          check_for_large_images prev_sibling, parent_depth, sibling_depth + 1 if prev_sibling.respond_to?(:parent)
         else
-          check_for_large_images(node.parent, parent_depth + 1, 0) if node.parent.present?
+          check_for_large_images(node.parent, parent_depth + 1, 0) if node.respond_to?(:parent)
         end
       end
       # else
