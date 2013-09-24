@@ -19,9 +19,9 @@ class ImageExtractor
     bad_image_names = options[:bad_image_names] || %w"
       .html .gif .ico button twitter.jpg facebook.jpg digg.jpg digg.png delicious.png facebook.png
       reddit.jpg doubleclick diggthis diggThis adserver /ads/ ec.atdmt.com mediaplex.com adsatt view.atdmt"
-    @bad_image_names_regex = Regexp.new bad_image_names.map {|n| Regexp.escape(n) }.join("|")
+    @bad_image_names_regex = Regexp.new bad_image_names.map { |n| Regexp.escape(n) }.join("|")
     @images = []
-    @doc =  Nokogiri::HTML(document.html, nil, 'utf-8')
+    @doc = Nokogiri::HTML(document.html, nil, 'utf-8')
     @url = url
     @min_width = options[:min_width] || 100
     @min_height = options[:min_height] || 100
@@ -117,24 +117,27 @@ class ImageExtractor
       return []
     end
 
-    images.reject! {|i| !filename_ok? i }
+    images.reject! { |i| !filename_ok? i }
 
     images = filter_by_filesize(images, min_bytes, max_bytes)
 
-    download_images_and_get_results(images, parent_depth).tap do |results|
-      #if results.empty?
-      if parent_depth < 5
-        # We start at the top node then recursively go up to siblings/parent/grandparent to find something good
-        if prev_sibling = node.previous_sibling
-          check_for_large_images prev_sibling, parent_depth, sibling_depth + 1 if prev_sibling.respond_to?(:parent)
-        else
-          check_for_large_images(node.parent, parent_depth + 1, 0) if node.respond_to?(:parent)
+    begin
+      download_images_and_get_results(images, parent_depth).tap do |results|
+        if parent_depth < 5
+          # We start at the top node then recursively go up to siblings/parent/grandparent to find something good
+          if prev_sibling = node.previous_sibling
+            check_for_large_images prev_sibling, parent_depth, sibling_depth + 1 if prev_sibling.respond_to?(:parent)
+          else
+            check_for_large_images(node.parent, parent_depth + 1, 0) if node.respond_to?(:parent)
+          end
         end
+        @images += results unless results.empty?
       end
-      # else
-      @images += results
-      # end
+    rescue
+      log "Oops: #{$!}"
+      return []
     end
+
   end
 
   #  loop through all the images and find the ones that have the sufficient bytes to even make them a candidate
@@ -142,9 +145,9 @@ class ImageExtractor
     found = 0
     images.map do |image|
       bytes = get_bytes_for_image image
-      log "%s bytes - %s" % [bytes, image]
+      #log "%s bytes - %s" % [bytes, image]
       if found < 20 and bytes and (bytes == 0 or bytes > min_bytes) and bytes < max_bytes
-        log "filter_by_filesize: Found potential image - size: #{bytes} bytes, src: #{image}"
+        #log "filter_by_filesize: Found potential image - size: #{bytes} bytes, src: #{image}"
         found += 1
         image
       else
@@ -176,7 +179,7 @@ class ImageExtractor
         return resp.content_length
       end
     rescue
-     log "Error getting image size for #{src} - #{$!}"
+      log "Error getting image size for #{src} - #{$!}"
     end
 
     return 0
@@ -231,7 +234,7 @@ class ImageExtractor
       end
     end
 
-    results.sort {|a, b| b.last <=> a.last }.map(&:first)
+    results.sort { |a, b| b.last <=> a.last }.map(&:first)
   end
 
 end
