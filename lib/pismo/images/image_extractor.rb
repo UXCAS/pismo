@@ -18,7 +18,7 @@ class ImageExtractor
     @options = options
     bad_image_names = options[:bad_image_names] || %w"
       .html .gif .ico button twitter.jpg facebook.jpg digg.jpg digg.png delicious.png facebook.png
-      reddit.jpg doubleclick diggthis diggThis adserver /ads/ ec.atdmt.com mediaplex.com adsatt view.atdmt www.thedailybeast.com"
+      reddit.jpg doubleclick diggthis diggThis adserver /ads/ ec.atdmt.com mediaplex.com adsatt view.atdmt www.thedailybeast.com /content_list/"
     @bad_image_names_regex = Regexp.new bad_image_names.map { |n| Regexp.escape(n) }.join("|")
     @images = []
     @doc = Nokogiri::HTML(document.html, nil, 'utf-8')
